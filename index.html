@@ -1,0 +1,179 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+   <meta name="author"             content="Kristofer Escobar" />
+   <link rel="stylesheet" href="alanbos.css" type="text/css" media="screen" />
+   <title>
+      Kris' Operating System
+   </title>
+
+   <!-- Globals CONSTANTS and _Variables. Must included be first. -->
+   <script type="text/javascript" src="globals.js"></script>	
+   
+   <!-- Other Routines -->
+   <script type="text/javascript" src="scripts/utils.js"></script>  
+
+   <!-- Host (Hardware Simulation) Routines -->
+   <script type="text/javascript" src="scripts/host/decode.js"></script>
+   <script type="text/javascript" src="scripts/host/cpu.js"></script>
+   <script type="text/javascript" src="scripts/host/control.js"></script>
+   <script type="text/javascript" src="scripts/host/devices.js"></script>
+   <script type="text/javascript" src="scripts/host/coreMemory.js"></script>
+
+   <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
+   <script type="text/javascript" src="scripts/os/pcb.js"></script>   
+   <script type="text/javascript" src="scripts/os/memoryManager.js"></script>
+   <script type="text/javascript" src="scripts/os/interrupt.js"></script>
+   <script type="text/javascript" src="scripts/os/canvastext.js"></script>	
+   <script type="text/javascript" src="scripts/os/console.js"></script>	
+   <script type="text/javascript" src="scripts/os/deviceDriver.js"></script>
+   <script type="text/javascript" src="scripts/os/deviceDriverKeyboard.js"></script>
+   <script type="text/javascript" src="scripts/os/queue.js"></script>
+   <script type="text/javascript" src="scripts/os/shell.js"></script>
+   <script type="text/javascript" src="scripts/os/kernel.js"></script>
+
+
+</head>
+
+<body onload="simInit();  getCurentTime(); loadDefaultProgram(); createMainMemoryTable();">
+
+<table id="tableDisplay" style="border:1px solid white;">
+  <tr>
+    <td align="center">
+      <span>Current Time: </span>
+      <span id ="time"></span>
+    </td>
+    <td align="center">
+      <span>Status : </span>
+      <span id="status">Set the status using the  "status" command.</span>
+    </td>
+  </tr>
+
+    <tr>
+        <td align="center">
+            <input type="button"
+                   id = "btnStartOS"
+                   name="brnStartOS"
+                   class="normal_button"
+                   value="Start"
+                   tabindex="0"
+                   onclick="simBtnStartOS_click(this)"
+            />
+            <input type="button"
+                   id = "btnHaltOS"
+                   name="brnHaltOS"
+                   class="normal_button"
+                   disabled="disabled"
+                   value="Halt"
+                   tabindex="1"
+                   onclick="simBtnHaltOS_click(this)"
+            />            
+            <input type="button"
+                   id = "btnReset"
+                   name="brnReset"
+                   class="normal_button"
+                   disabled="disabled"
+                   value="Reset"
+                   tabindex="2"
+                   onclick="simBtnReset_click(this)"
+            />            
+        </td>
+        <td class="label" align="center">
+            Control Log
+        </td>
+    </tr>
+    <tr valign="top">
+        <td id="tdDisplay">
+            <canvas id="display"
+                    width="500px"
+                    height="500px"
+                    tabindex="3">
+            </canvas>
+        </td>
+        <td id="tdLog">
+            <textarea name="taLog"
+                      id = "taLog"
+                      rows="38"
+                      cols="60"
+            ></textarea>
+        </td>
+        <td>
+          <table id="tblReadyQueue" border="1" class="table">
+            <tr>
+              <th colspan="8">Ready Queue</th>
+            </tr>
+            <tr>
+              <th>PID</th>
+              <th>BASE</th>
+              <th>LIMIT</th>
+              <th>PC</th>
+              <th>ACC</th>
+              <th>X</th>
+              <th>Y</th>
+              <th>Z</th>
+            </tr>
+            <tr align="center">
+              <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+            </tr>
+            <tr align="center">
+              <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+            </tr>
+            <tr align="center">
+              <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+            </tr>
+            <tr align="center">
+              <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+            </tr>
+            <tr align="center">
+              <td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>
+            </tr>
+          </table>
+          <br>
+          <table id="tblCPU" border="1" class="table">
+            <tr>
+              <th colspan="5">CPU Status</th>
+            </tr>
+            <tr>
+              <th>PC</th>
+              <th>ACC</th>
+              <th>X</th>
+              <th>Y</th>
+              <th>Z</th>
+            </tr>
+            <tr align="center">
+              <td>0</td>
+              <td>0</td>
+              <td>0</td>
+              <td>0</td>
+              <td>0</td>
+            </tr>
+          </table>
+          <br>
+          <span id="mainMemory"></span>
+          <div class="label" align="center" width="100%"> User Program </div>
+          <textarea name="input6502"
+                      id ="input6502"
+                      rows="8"
+                      cols="60"
+          ></textarea>
+        </td>
+    </tr>
+
+</table>
+
+
+
+<p></p>
+
+<table width="100%" border="0" cellspacing="0" cellpadding="0">
+    <tr valign="top">
+        <td align="center" class="footer">
+            Reproduction is prohibited without the express written consent of 
+            Kristofer S. Escobar.
+        </td>
+    </tr>
+</table>
+
+</body>
+</html>
