@@ -44,39 +44,54 @@ function cpu()
         // Do real work here. Set this.isExecuting appropriately.
         if(this.isExecuting === true)
         {
+          // If there are multiple processes, schedule them.
+          if(readyQueue.getSize() > 1)
+          {
+            // Schedule processes.
+            schedule();
+          }
+
+          // Get the current pcb's pc.
+          updateCPUStatus();
+
           // FETCH
           var instruction = fetch(_CPU.PC);
 
           // INCREMENT
           increment();
 
-          //Testing.
-          //alert("x " +_CPU.Xreg);
-          //alert("y " +_CPU.Yreg);
-
           // EXECUTE
           if(notData(instruction))
           execute(instruction);
 
-          // update cpu status
-          updateCPUStatus();
+          // Update cpu status
+          //updateCPUStatus();
 
           // Update memory.
           updateMemory();
 
+          // Update current pcb.
+          updatePCB(_CPU);
+
           // Turn off execute flag.
-          if(_CPU.PC == currentPCB.limit)
+          if(_CPU.PC == currentPCB.limit - currentOffset)
           {
             // Stop Execution.
             this.isExecuting = false;
-            
-            // Update pcb.
-            updatePCB(_CPU);
+
+            alert(currentPCB.base);
+            alert(currentPCB.limit);
+
+            // Update cpu.
+            updateCPUStatus();
 
             // Update the ready queue.
             updateReadyQueue(currentPCB);
           }
 
+          // Check if pc is over 255
+          // if it throw error?
+          //alert("pc: " + _CPU.PC + "mem 40" + memory[40]);
         }
     }
 }
@@ -129,6 +144,13 @@ function cpu()
 
     function updateCPUStatus()
     {
+    //Upadate cpu with pcb values.
+    _CPU.PC    = currentPCB.PC;
+    _CPU.Acc   = currentPCB.Acc;
+    _CPU.Xreg  = currentPCB.Xreg;
+    _CPU.Yreg  = currentPCB.Yreg;
+    _CPU.Zflag = currentPCB.Zflag;
+
 
     // Get reference to cpu table.
     var cpuTable = document.getElementById("tblCPU");
@@ -147,4 +169,38 @@ function cpu()
     x.innerHTML = _CPU.Xreg;
     y.innerHTML = _CPU.Yreg;
     z.innerHTML = _CPU.Zflag;
+  }
+
+  //TODO: Check if this is working correctly.
+  // Schedule processes. (Round Robin)
+  function schedule()
+  {
+    // Get the first pcb from the ready queue.
+    if(timeSlice === 0)
+      currentPCB = readyQueue.dequeue();
+
+    // Keep track of time slice.
+    if(timeSlice == getQuantum())
+    {
+      // Add current pcb to the end of the ready queue.
+      readyQueue.enqueue(currentPCB);
+
+      // Reset time slice.
+      timeSlice = 0;
+    }
+
+    // Increment time slice.
+    timeSlice = timeSlice + 1;
+
+  }
+
+  function getQuantum()
+  {
+    // If no user quantum is set, use deafault.
+    if(userQuantum === null)
+    {
+      userQuantum = DEFAULT_QUANTUM;
+    }
+
+    return userQuantum;
   }

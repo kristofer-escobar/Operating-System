@@ -170,10 +170,10 @@ function krnTrace(msg)
       if (msg === "Idle")
       {
          // We can't log every idle clock pulse because it would lag the browser very quickly.
-         if (_OSclock % 10 == 0)  // Check the CPU_CLOCK_INTERVAL in globals.js for an 
+         if (_OSclock % 10 == 0)  // Check the CPU_CLOCK_INTERVAL in globals.js for an
          {                        // idea of the tick rate and adjust this line accordingly.
-            simLog(msg, "OS");          
-         }         
+            simLog(msg, "OS");
+         }
       }
       else
       {
@@ -207,11 +207,23 @@ function krnLoadProgram()
 
     if(valid)
     {
-      var base = memory.length;
+      currentBase = currentLimit;
 
-      var limit =  base + instructions.length;
+      // Calculate remaining free space.
+      currentOffset = (PAGE_SIZE -  instructions.length);
 
-      var process = createProcess(base, limit);
+      //var base = memory.length;
+      currentLimit = currentBase + PAGE_SIZE;
+
+      //var limit =  base + instructions.length;
+
+      // Real Limit
+      //var limit =  base + PAGE_SIZE;
+      //TODO: create a page size for each program.
+      // If a program tries to access a memory location
+      // outside it's page(limit register), then show blue screen (or error).
+
+      var process = createProcess(currentBase, currentLimit);
       
       // Update main memory.
       updateMainMemory(instructions);
@@ -237,6 +249,9 @@ function krnRunProgram(pid)
     // Get pcb for given pid.
     currentPCB = processControlBlocks[pid];
 
+    // Add pcb to ready queue.
+    readyQueue.enqueue(currentPCB);
+
     krnTrace("Starting to run program: " + pid);
 
     // Start cpu.
@@ -257,7 +272,7 @@ function createProcess(base, limit)
   _PCB.base = base;
   _PCB.limit = limit;
 
-  // Add pcb to associative array.
+  // Add pcb to associative array. (Resident in memory)
   processControlBlocks[_PCB.pid] = _PCB;
 
   // Update Ready Queue.
@@ -268,29 +283,40 @@ function createProcess(base, limit)
   return _PCB;
 }
 
+function endProcess(pid)
+{
+  for(i = 0; i < readyQueue.getSize(); i++)
+{
+    if(readyQueue.q[i].pid == pid)
+    {
+        // Remove from ready queue.
+        readyQueue.q.splice(i,1);
+    }
+}
+}
+
 // Function to print contents to screen.
 function krnPrint()
 {
   //#$01 in X reg = print the integer stored in the Y register.
   if(parseInt(_CPU.Xreg, 10) == 1)
   {
-    _StdIn.putText(_CPU.Yreg.toString());
+    _StdIn.putText(_CPU.Yreg.toString() + " ");
    // _StdIn.advanceLine();
   }
   //#$02 in X reg = print the 00-terminated string stored at the address in the Y register.
   else if (parseInt(_CPU.Xreg, 10) == 2)
   {
     // While mem[] doesn't equal "00"
-    while(parseInt(memory[_CPU.Yreg], 10) !== 0)
+    while(parseInt(memory[parseInt(_CPU.Yreg, 16)], 10) !== 0)
     {
-      //alert(_CPU.Yreg);
-      //alert(memory[_CPU.Yreg]);
-      var output = String.fromCharCode(parseInt(memory[_CPU.Yreg],16 ));
+      var output = String.fromCharCode(parseInt(memory[parseInt(_CPU.Yreg, 16)],16 ));
       _StdIn.putText(output.toString());
-      //_StdIn.advanceLine();
       _CPU.Yreg++;
     }
 
+    _StdIn.advanceLine();
+    _OsShell.putPrompt();
   }
   else
   {

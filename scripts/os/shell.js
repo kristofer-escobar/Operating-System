@@ -103,6 +103,27 @@ function shellInit()
     sc.function = shellRun;
     this.commandList[this.commandList.length] = sc;
     
+    // quantum
+    sc = new ShellCommand();
+    sc.command = "quantum";
+    sc.description = "- Set Round Robin quantum.";
+    sc.function = shellQuantum;
+    this.commandList[this.commandList.length] = sc;
+
+    // kill
+    sc = new ShellCommand();
+    sc.command = "kill";
+    sc.description = "- Kill a running process.";
+    sc.function = shellKill;
+    this.commandList[this.commandList.length] = sc;
+
+    // display
+    sc = new ShellCommand();
+    sc.command = "display";
+    sc.description = "- Display all running processes.";
+    sc.function = shellDisplay;
+    this.commandList[this.commandList.length] = sc;
+
     // shutdown
     sc = new ShellCommand();
     sc.command = "shutdown";
@@ -431,8 +452,17 @@ function shellDiv(args)
 // Shell command to load user program.
 function shellLoad(args)
 {
-    // Call kernel to load routine.
-    krnLoadProgram();
+    if(args.length > 0)
+    {
+        _StdIn.putText("Error: Load command does not take parameters.");
+    }
+    else
+    {
+        // Call kernel to load routine.
+        krnLoadProgram();
+    }
+
+
 }
 
 // Shell command to run user program.
@@ -446,6 +476,38 @@ function shellRun(pid)
     else
     {
         _StdIn.putText("Error: No pid specified.");
+    }
+
+}
+
+// Shell command to set the round robin quantum.
+function shellQuantum(quantum)
+{
+    // TODO: Set the global variable that keeps track of the quantum.
+    userQuantum = quantum;
+}
+
+// Shell command to kill a process.
+function shellKill(pid)
+{
+    // TODO: Place process on resident queue. Take off of ready queue.
+    endProcess(pid);
+}
+
+function shellDisplay()
+{
+    if(readyQueue.isEmpty())
+    {
+        _StdIn.putText("No running processes.");
+    }
+    else
+    {
+        //TODO: Display the PID's of all running processes.
+        for(i = 0; i < readyQueue.getSize(); i++)
+        {
+            // Display pid.
+            _StdIn.putText(readyQueue.q[i].pid + " ");
+        }
     }
 
 }

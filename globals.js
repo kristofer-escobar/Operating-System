@@ -20,7 +20,6 @@ var TIMER_IRQ    = 0;  // Pages 23 (timer), 9 (interrupts), and 561 (interrupt p
                        // NOTE: The timer is different from hardware clock pulses. Don't confuse these.
 var KEYBOARD_IRQ = 1;
 
-
 //
 // Global Variables
 //
@@ -29,6 +28,12 @@ var _CPU = null;
 var _OSclock = 0;       // Page 23.
 
 var _Mode = 0;   // 0 = Kernel Mode, 1 = User Mode.  See page 21.
+
+var currentBase = 0;
+
+var currentLimit = 0;
+
+var currentOffset = 0;
 
 // TODO: Fix the naming convention for these next five global vars.
 var CANVAS = null;              // Initialized in hostInit().
@@ -72,4 +77,9 @@ var currentPCB = null;
 
 // Currently running program.
 var runningProgram = null;
+
+// Global user quantum.
+var userQuantum = null;
+
+var timeSlice = 0;
 

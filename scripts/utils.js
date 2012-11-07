@@ -141,7 +141,7 @@ function validateProgram(instructions)
         var instr = instructions[i].toUpperCase();
 
         // Check for invalid size instruction.
-        if (instr.length > 2)
+        if (instr.length > 2 || instr.length < 2)
         {
             _StdIn.putText("Error: Instructions can only be 2 chars long.");
             return false;
@@ -172,8 +172,8 @@ function validateProgram(instructions)
         else
         {
             // Error.
-            _StdIn.putText("Error: Unknown op code: " + instr);
-            return false;
+            //_StdIn.putText("Error: Unknown op code: " + instr);
+            //return false;
         }
 
     }

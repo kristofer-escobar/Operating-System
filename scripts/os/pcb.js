@@ -25,7 +25,7 @@ function pcb()
         this.pid   = nextPid;
         this.base  = 0;
         this.limit = 0;
-        this.PC    = 0;
+        this.PC    = this.pid * PAGE_SIZE;
         this.Acc   = 0;
         this.Xreg  = 0;
         this.Yreg  = 0;
@@ -57,6 +57,8 @@ function updateReadyQueue(currPCB)
       // Get reference to cpu table.
     var readyQueue = document.getElementById("tblReadyQueue");
 
+
+    //TODO: make dynamic
     var pid  = readyQueue.rows[2].cells[0];
     var base  = readyQueue.rows[2].cells[1];
     var limit  = readyQueue.rows[2].cells[2];

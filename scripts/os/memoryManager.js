@@ -1,3 +1,9 @@
+// Queue to store currently runnning processes.
+var readyQueue = new Queue();
+
+// Queue to store terminated processes.
+var terminatedQueue = new Queue();
+
 // Function to create main memory table.
 function createMainMemoryTable()
 {
@@ -99,6 +105,7 @@ function updateMainMemory(instructions)
     // Index for instruction position.
     var index = 0;
 
+    //TODO: Fix first column, make bold.
     // Updates cells.
     for(i = 1; i <= 8; i++)
         {
