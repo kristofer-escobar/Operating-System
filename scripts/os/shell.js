@@ -102,6 +102,13 @@ function shellInit()
     sc.description = "- Run a loaded user program.";
     sc.function = shellRun;
     this.commandList[this.commandList.length] = sc;
+
+    // run all
+    sc = new ShellCommand();
+    sc.command = "runall";
+    sc.description = "- Run all loaded user programs.";
+    sc.function = shellRunAll;
+    this.commandList[this.commandList.length] = sc;
     
     // quantum
     sc = new ShellCommand();
@@ -476,6 +483,31 @@ function shellRun(pid)
     else
     {
         _StdIn.putText("Error: No pid specified.");
+    }
+
+}
+
+// Shell command to run user program.
+function shellRunAll(pid)
+{
+    if(pid.length > 0)
+    {
+        _StdIn.putText("Error: runall command takes no arguments.");
+    }
+    else
+    {
+        if(readyQueue.getSize() > 0)
+        {
+            // Call kenel to run all programs.
+            for(i = 0; i < readyQueue.getSize(); i++)
+            {
+                krnRunProgram(readyQueue[i].pid);
+            }
+        }
+        else
+        {
+            _StdIn.putText("Error: No programs loaded.");
+        }
     }
 
 }

@@ -1,9 +1,3 @@
-// Queue to store currently runnning processes.
-var readyQueue = new Queue();
-
-// Queue to store terminated processes.
-var terminatedQueue = new Queue();
-
 // Function to create main memory table.
 function createMainMemoryTable()
 {
@@ -94,10 +88,13 @@ function createMainMemoryTable()
 }
 
 // Function to update the contents of the main memory table.
-function updateMainMemory(instructions)
+function updateMainMemory(instructions, process)
 {
+    // Set memory length.
+    memory.length = process.pid * PAGE_SIZE;
+
     // Add program to memory.
-    memory = memory.concat(memory, instructions);
+    memory = memory.concat(instructions);
 
     // Get reference to main memory table.
     var mainMemoryTable = document.getElementById("tblMainMemory");
@@ -144,4 +141,13 @@ function updateMemory()
             
         }
 
+}
+
+// Check for valid memory address.
+function validateMemory(memory, pcb)
+{
+    if(memory < pcb.limit)
+        return memory
+    else
+        blueScreenOfDeath("Page Fault.");
 }

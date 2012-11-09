@@ -44,19 +44,27 @@ function cpu()
         // Do real work here. Set this.isExecuting appropriately.
         if(this.isExecuting === true)
         {
-          // If there are multiple processes, schedule them.
-          if(readyQueue.getSize() > 1)
-          {
-            // Schedule processes.
-            schedule();
-          }
+          //alert(timeSlice);
+          schedule(_CPU);
 
-          // Get the current pcb's pc.
-          updateCPUStatus();
+
+          // Get the time slice
+          // if it's 6, raise interrupt.
+
+          // If there are multiple processes, schedule them.
+          // if(readyQueue.getSize() > 1)
+          // {
+          //   // Schedule processes.
+          //   schedule();
+          // }
+          // else
+          // {
+          //   readyQueue.dequeue();
+          // }
 
           // FETCH
           var instruction = fetch(_CPU.PC);
-
+          
           // INCREMENT
           increment();
 
@@ -65,40 +73,47 @@ function cpu()
           execute(instruction);
 
           // Update cpu status
-          //updateCPUStatus();
+          updateCPUStatus();
 
           // Update memory.
           updateMemory();
 
-          // Update current pcb.
+          // Update pcb.
           updatePCB(_CPU);
 
+          // Update the ready queue.
+          updateReadyQueue(currentPCB);
+
+          // // Update current pcb.
+          // updatePCB(_CPU);
+
           // Turn off execute flag.
-          if(_CPU.PC == currentPCB.limit - currentOffset)
-          {
-            // Stop Execution.
-            this.isExecuting = false;
+          // if(_CPU.PC == currentPCB.limit - currentOffset)
+          // {
+          //   // Stop Execution.
+          //   this.isExecuting = false;
 
-            alert(currentPCB.base);
-            alert(currentPCB.limit);
+          //   // Put process on terminated queue.
+          //   terminatedQueue[currentPCB.pid] = currentPCB;
 
-            // Update cpu.
-            updateCPUStatus();
+          //   // Update cpu.
+          //   updateCPUStatus();
 
-            // Update the ready queue.
-            updateReadyQueue(currentPCB);
-          }
+          //   // Update the ready queue.
+          //   updateReadyQueue(currentPCB);
+          // }
 
           // Check if pc is over 255
           // if it throw error?
           //alert("pc: " + _CPU.PC + "mem 40" + memory[40]);
         }
+      }
     }
-}
     function fetch(pc)
     {
       // Fetch program from memory.
-      return memory.slice(currentPCB.base, currentPCB.limit)[pc];
+      //return memory.slice(currentPCB.base, currentPCB.limit)[pc];
+      return memory[pc];
     }
 
     function increment()
@@ -144,19 +159,8 @@ function cpu()
 
     function updateCPUStatus()
     {
-    //Upadate cpu with pcb values.
-    _CPU.PC    = currentPCB.PC;
-    _CPU.Acc   = currentPCB.Acc;
-    _CPU.Xreg  = currentPCB.Xreg;
-    _CPU.Yreg  = currentPCB.Yreg;
-    _CPU.Zflag = currentPCB.Zflag;
-
-
     // Get reference to cpu table.
     var cpuTable = document.getElementById("tblCPU");
-
-    // Index for instruction position.
-    var index = 0;
 
     var pc  = cpuTable.rows[2].cells[0];
     var acc = cpuTable.rows[2].cells[1];
@@ -171,27 +175,38 @@ function cpu()
     z.innerHTML = _CPU.Zflag;
   }
 
-  //TODO: Check if this is working correctly.
+function updateCPU(pcb)
+{
+    //Upadate cpu with pcb values.
+    _CPU.PC    = pcb.PC;
+    _CPU.Acc   = pcb.Acc;
+    _CPU.Xreg  = pcb.Xreg;
+    _CPU.Yreg  = pcb.Yreg;
+    _CPU.Zflag = pcb.Zflag;
+}
+
+  //TODO: Check if this is working correctly. NEEDS TO BE A SOFTWARE INTERRUPT
   // Schedule processes. (Round Robin)
-  function schedule()
+  function schedule(cpu)
   {
-    // Get the first pcb from the ready queue.
+    // // Check if new process needs to be executed.
     if(timeSlice === 0)
-      currentPCB = readyQueue.dequeue();
-
-    // Keep track of time slice.
-    if(timeSlice == getQuantum())
     {
-      // Add current pcb to the end of the ready queue.
-      readyQueue.enqueue(currentPCB);
+    // Get the current pcb.
+    currentPCB = readyQueue.dequeue();
 
-      // Reset time slice.
-      timeSlice = 0;
+    // Get the current pcb and store into cpu.
+    updateCPU(currentPCB);
+
     }
 
-    // Increment time slice.
-    timeSlice = timeSlice + 1;
+    if(timeSlice == (getQuantum() - 1))
+    {
+      _CPU.isExecuting = false;
+     _KernelInterruptQueue.enqueue(new Interrput(TIMER_IRQ, cpu));
+    }
 
+    timeSlice = timeSlice + 1;
   }
 
   function getQuantum()

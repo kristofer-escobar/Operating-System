@@ -113,7 +113,7 @@ function blueScreenOfDeath(error)
   DRAWING_CONTEXT.fillRect(0,0, 500, 500 );
   
   // Write out an error message.
-  var errorMsg = "A problem has been detected   and Kris OS has been shutdown to prevent damage to your     computer.";
+  var errorMsg = "A problem has been detected   and Kris OS has been shutdown to prevent damage to your     computer." + "                                                                                 " + "Error: " + error;
 
 // Format Message on canvas.
 var x = 0;

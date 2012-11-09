@@ -54,19 +54,18 @@ function updatePCB(cpu)
 
 function updateReadyQueue(currPCB)
 {
-      // Get reference to cpu table.
+    // Get reference to cpu table.
     var readyQueue = document.getElementById("tblReadyQueue");
 
-
     //TODO: make dynamic
-    var pid  = readyQueue.rows[2].cells[0];
-    var base  = readyQueue.rows[2].cells[1];
-    var limit  = readyQueue.rows[2].cells[2];
-    var pc  = readyQueue.rows[2].cells[3];
-    var acc = readyQueue.rows[2].cells[4];
-    var x   = readyQueue.rows[2].cells[5];
-    var y   = readyQueue.rows[2].cells[6];
-    var z   = readyQueue.rows[2].cells[7];
+    var pid    = readyQueue.rows[2 + currPCB.pid].cells[0];
+    var base   = readyQueue.rows[2 + currPCB.pid].cells[1];
+    var limit  = readyQueue.rows[2 + currPCB.pid].cells[2];
+    var pc     = readyQueue.rows[2 + currPCB.pid].cells[3];
+    var acc    = readyQueue.rows[2 + currPCB.pid].cells[4];
+    var x      = readyQueue.rows[2 + currPCB.pid].cells[5];
+    var y      = readyQueue.rows[2 + currPCB.pid].cells[6];
+    var z      = readyQueue.rows[2 + currPCB.pid].cells[7];
 
     pid.innerHTML = currPCB.pid;
     base.innerHTML = currPCB.base;

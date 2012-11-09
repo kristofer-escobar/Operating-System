@@ -123,7 +123,7 @@ function krnInterruptHandler(irq, params)    // This is the Interrupt Handler Ro
     switch (irq)
     {
         case TIMER_IRQ:
-            krnTimerISR();                   // Kernel built-in routine for timers (not the clock).
+            krnTimerISR(params);                   // Kernel built-in routine for timers (not the clock).
             break;
         case KEYBOARD_IRQ:
             krnKeyboardDriver.isr(params);   // Kernel mode device driver
@@ -136,9 +136,31 @@ function krnInterruptHandler(irq, params)    // This is the Interrupt Handler Ro
     // 3. Restore the saved state.  TODO: Question: Should we restore the state via IRET in the ISR instead of here? p560.
 }
 
-function krnTimerISR()  // The built-in TIMER (not clock) Interrupt Service Routine (as opposed to an ISR coming from a device driver).
+function krnTimerISR(cpu)  // The built-in TIMER (not clock) Interrupt Service Routine (as opposed to an ISR coming from a device driver).
 {
     // Check multiprogramming parameters and enfore quanta here. Call the scheduler / context switch here if necessary.
+    
+    // Reset time slice.
+    timeSlice = 0;
+
+    // Log context switch.
+    krnTrace("Start context switch.");
+
+    // Store the contents of the cpu to currentPCB.
+    updatePCB(cpu);
+
+    // Add currentPCB to the end of the ready queue.
+    readyQueue.enqueue(currentPCB);
+
+    // // Get the new current pcb. (next process)
+    // currentPCB = readyQueue.dequeue();
+
+    // // Get contents of the current pcb and store them to the cpu.
+    // updateCPU(currentPCB);
+
+    krnTrace("End context switch.");
+
+    _CPU.isExecuting = true;
 }   
 
 
@@ -197,7 +219,13 @@ function krnLoadProgram()
     var program = getUserProgram();
 
     // Separate instructions by white space and put in an array.
-    var instructions = program.split(" ");
+    instructions = program.split(" ");
+
+    // Length of program.
+    //var numberOfInstructions = instructions.length;
+
+    // Allocate page.
+    //instructions.length = PAGE_SIZE;
 
     // Check for program validity.
     var valid = validateProgram(instructions);
@@ -210,12 +238,14 @@ function krnLoadProgram()
       currentBase = currentLimit;
 
       // Calculate remaining free space.
-      currentOffset = (PAGE_SIZE -  instructions.length);
+      currentOffset = (PAGE_SIZE - instructions.length);
 
       //var base = memory.length;
       currentLimit = currentBase + PAGE_SIZE;
 
       //var limit =  base + instructions.length;
+
+      //alert("Base " + currentBase + " Limit " + currentLimit );
 
       // Real Limit
       //var limit =  base + PAGE_SIZE;
@@ -224,13 +254,22 @@ function krnLoadProgram()
       // outside it's page(limit register), then show blue screen (or error).
 
       var process = createProcess(currentBase, currentLimit);
-      
+
+      //alert("pc " + process.PC);
+      if(process != null)
+      {
       // Update main memory.
-      updateMainMemory(instructions);
+      updateMainMemory(instructions, process);
 
       // Notify the user that the program has loaded successfully.
       krnTrace("Program loaded.");
       _StdIn.putText("pid: " + process.pid);
+      }
+      else
+      {
+
+      }
+
     }
     else
     {
@@ -247,17 +286,20 @@ function krnRunProgram(pid)
   if(memory.length > 0)
   {
     // Get pcb for given pid.
-    currentPCB = processControlBlocks[pid];
+    var newPCB = residentQueue[pid];
 
     // Add pcb to ready queue.
-    readyQueue.enqueue(currentPCB);
+    readyQueue.enqueue(newPCB);
 
     krnTrace("Starting to run program: " + pid);
+
+    // Reset time slice.
+    timeSlice = 0;
 
     // Start cpu.
     _CPU.isExecuting = true;
 
-    //TODO: execute program , update pcb, cpu, and display output.
+   //TODO: execute program , update pcb, cpu, and display output.
   }
   else
     _StdIn.putText("Failed to run, no program loaded.");
@@ -272,8 +314,12 @@ function createProcess(base, limit)
   _PCB.base = base;
   _PCB.limit = limit;
 
+  // Limit loading to 5 programs.
+  if(_PCB.pid > 4)
+    return null;
+
   // Add pcb to associative array. (Resident in memory)
-  processControlBlocks[_PCB.pid] = _PCB;
+  residentQueue[_PCB.pid] = _PCB;
 
   // Update Ready Queue.
   updateReadyQueue(_PCB);

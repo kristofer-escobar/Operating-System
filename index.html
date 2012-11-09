@@ -19,7 +19,6 @@
    <script type="text/javascript" src="scripts/host/cpu.js"></script>
    <script type="text/javascript" src="scripts/host/control.js"></script>
    <script type="text/javascript" src="scripts/host/devices.js"></script>
-   <script type="text/javascript" src="scripts/host/coreMemory.js"></script>
 
    <!-- Virtual OS Routines: Make sure Kernel code is last, since it needs those above it. -->
    <script type="text/javascript" src="scripts/os/pcb.js"></script>   
@@ -29,6 +28,7 @@
    <script type="text/javascript" src="scripts/os/deviceDriver.js"></script>
    <script type="text/javascript" src="scripts/os/deviceDriverKeyboard.js"></script>
    <script type="text/javascript" src="scripts/os/queue.js"></script>
+   <script type="text/javascript" src="scripts/host/coreMemory.js"></script>
    <script type="text/javascript" src="scripts/os/memoryManager.js"></script>
    <script type="text/javascript" src="scripts/os/shell.js"></script>
    <script type="text/javascript" src="scripts/os/kernel.js"></script>
@@ -58,7 +58,7 @@
                    class="normal_button"
                    value="Start"
                    tabindex="0"
-                   onclick="simBtnStartOS_click(this)"
+                   onclick="simBtnStartOS_click(this); getElementById('display').focus()"
             />
             <input type="button"
                    id = "btnHaltOS"
