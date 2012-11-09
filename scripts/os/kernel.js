@@ -143,14 +143,27 @@ function krnTimerISR(cpu)  // The built-in TIMER (not clock) Interrupt Service R
     // Reset time slice.
     timeSlice = 0;
 
-    // Log context switch.
-    krnTrace("Start context switch.");
+    if(!killFlag)
+    {
+      // Log context switch.
+      krnTrace("Performing context switch.");
 
-    // Store the contents of the cpu to currentPCB.
-    updatePCB(cpu);
+      // Store the contents of the cpu to currentPCB.
+      updatePCB(cpu);
+    }
+    else
+    {
+      // Log killing of process.
+      krnTrace("Killing process: " + processToKill);
+    }
 
-    // Add currentPCB to the end of the ready queue.
-    readyQueue.enqueue(currentPCB);
+      // Add currentPCB to the end of the ready queue.
+      readyQueue.enqueue(currentPCB);
+
+      if(killFlag)
+      {
+        endProcess(processToKill);
+      }
 
     // // Get the new current pcb. (next process)
     // currentPCB = readyQueue.dequeue();
@@ -158,10 +171,9 @@ function krnTimerISR(cpu)  // The built-in TIMER (not clock) Interrupt Service R
     // // Get contents of the current pcb and store them to the cpu.
     // updateCPU(currentPCB);
 
-    krnTrace("End context switch.");
-
-    _CPU.isExecuting = true;
-}   
+    if(readyQueue.getSize > 0)
+      _CPU.isExecuting = true;
+}
 
 
 
@@ -293,6 +305,9 @@ function krnRunProgram(pid)
 
     krnTrace("Starting to run program: " + pid);
 
+    // Initialize kill flag to false.
+    killFlag = false;
+
     // Reset time slice.
     timeSlice = 0;
 
@@ -331,7 +346,7 @@ function createProcess(base, limit)
 
 function endProcess(pid)
 {
-  for(i = 0; i < readyQueue.getSize(); i++)
+  for(var i = 0; i < readyQueue.getSize(); i++)
 {
     if(readyQueue.q[i].pid == pid)
     {

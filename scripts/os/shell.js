@@ -523,7 +523,8 @@ function shellQuantum(quantum)
 function shellKill(pid)
 {
     // TODO: Place process on resident queue. Take off of ready queue.
-    endProcess(pid);
+    killFlag = true;
+    processToKill = pid;
 }
 
 function shellDisplay()

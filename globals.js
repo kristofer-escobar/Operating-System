@@ -83,3 +83,8 @@ var userQuantum = null;
 
 var timeSlice = 0;
 
+// Flag to determine whether to kill a process.
+var killFlag = false;
+
+var processToKill = null;
+

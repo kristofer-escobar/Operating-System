@@ -42,11 +42,9 @@ function cpu()
         krnTrace("CPU cycle");
         // TODO: Accumulate CPU usage and profiling statistics here.
         // Do real work here. Set this.isExecuting appropriately.
-        if(this.isExecuting === true)
+        if(this.isExecuting == true && !killFlag)
         {
-          //alert(timeSlice);
           schedule(_CPU);
-
 
           // Get the time slice
           // if it's 6, raise interrupt.
@@ -107,8 +105,16 @@ function cpu()
           // if it throw error?
           //alert("pc: " + _CPU.PC + "mem 40" + memory[40]);
         }
+
+        if(killFlag)
+        {
+          _CPU.isExecuting = false;
+          _KernelInterruptQueue.enqueue(new Interrput(TIMER_IRQ, cpu));
+        }
+
       }
     }
+
     function fetch(pc)
     {
       // Fetch program from memory.
@@ -202,7 +208,7 @@ function updateCPU(pcb)
 
     if(timeSlice == (getQuantum() - 1))
     {
-      _CPU.isExecuting = false;
+      //_CPU.isExecuting = false;
      _KernelInterruptQueue.enqueue(new Interrput(TIMER_IRQ, cpu));
     }
 
