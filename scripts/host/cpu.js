@@ -46,6 +46,7 @@ function cpu()
         {
           schedule(_CPU);
 
+          //alert(_CPU.PC);
           // Get the time slice
           // if it's 6, raise interrupt.
 
@@ -106,7 +107,7 @@ function cpu()
           //alert("pc: " + _CPU.PC + "mem 40" + memory[40]);
         }
 
-        if(killFlag)
+        if(killFlag === true)
         {
           _CPU.isExecuting = false;
           _KernelInterruptQueue.enqueue(new Interrput(TIMER_IRQ, cpu));
@@ -131,7 +132,8 @@ function cpu()
     function execute(instruction)
     {
       // decode instruction.
-      decodeInstruction(instruction);
+      //alert("executing " + instruction);
+      decode(instruction);
     }
 
     function systemCall(msg)
@@ -185,6 +187,7 @@ function updateCPU(pcb)
 {
     //Upadate cpu with pcb values.
     _CPU.PC    = pcb.PC;
+    //_CPU.PC    = pcb.PC + (currentOffset * PAGE_SIZE);
     _CPU.Acc   = pcb.Acc;
     _CPU.Xreg  = pcb.Xreg;
     _CPU.Yreg  = pcb.Yreg;
@@ -200,7 +203,9 @@ function updateCPU(pcb)
     {
     // Get the current pcb.
     currentPCB = readyQueue.dequeue();
+    krnTrace("CPU getting process: " + currentPCB.pid + " from ready queue.");
 
+    krnTrace("Loading contents of PCB to CPU.");
     // Get the current pcb and store into cpu.
     updateCPU(currentPCB);
 
@@ -212,7 +217,10 @@ function updateCPU(pcb)
      _KernelInterruptQueue.enqueue(new Interrput(TIMER_IRQ, cpu));
     }
 
+
+    krnTrace("Incrementing time slice.");
     timeSlice = timeSlice + 1;
+
   }
 
   function getQuantum()

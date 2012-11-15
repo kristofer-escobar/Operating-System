@@ -77,7 +77,16 @@
                    value="Reset"
                    tabindex="2"
                    onclick="simBtnReset_click(this)"
-            />            
+            />    
+            <input type="button"
+                   id = "btnStep"
+                   name="brnStep"
+                   class="normal_button"
+                   disabled="disabled"
+                   value="Step"
+                   tabindex="2"
+                   onclick="simBtnStep_click(this)"
+            />           
         </td>
         <td class="label" align="center">
             Control Log
@@ -85,11 +94,13 @@
     </tr>
     <tr valign="top">
         <td id="tdDisplay">
-            <canvas id="display"
+         <!--    <div style="width: 500px; height: 500px; overflow: auto;"> -->
+              <canvas id="display"
                     width="500px"
                     height="500px"
                     tabindex="3">
             </canvas>
+          <!--   </div> -->
         </td>
         <td id="tdLog">
             <textarea name="taLog"

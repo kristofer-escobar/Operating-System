@@ -145,11 +145,16 @@ function krnTimerISR(cpu)  // The built-in TIMER (not clock) Interrupt Service R
 
     if(!killFlag)
     {
+      if(terminatedQueue[currentPCB.pid] != currentPCB)
+      {
       // Log context switch.
+      krnTrace("Time quantum reached.");
       krnTrace("Performing context switch.");
-
+      
+      krnTrace("Storing contents of CPU to PCB.");
       // Store the contents of the cpu to currentPCB.
       updatePCB(cpu);
+      }
     }
     else
     {
@@ -157,12 +162,18 @@ function krnTimerISR(cpu)  // The built-in TIMER (not clock) Interrupt Service R
       krnTrace("Killing process: " + processToKill);
     }
 
-      // Add currentPCB to the end of the ready queue.
-      readyQueue.enqueue(currentPCB);
+      // if terminated don't add to ready queue.
+      if(terminatedQueue[currentPCB.pid] != currentPCB)
+      {
+        // Add currentPCB to the end of the ready queue.
+        krnTrace("Adding process: " + currentPCB.pid + " to end of ready queue.");
+        readyQueue.enqueue(currentPCB);
+      }
 
       if(killFlag)
       {
         endProcess(processToKill);
+        killFlag = false;
       }
 
     // // Get the new current pcb. (next process)
@@ -171,8 +182,11 @@ function krnTimerISR(cpu)  // The built-in TIMER (not clock) Interrupt Service R
     // // Get contents of the current pcb and store them to the cpu.
     // updateCPU(currentPCB);
 
-    if(readyQueue.getSize > 0)
+    if(readyQueue.getSize() > 0)
+    {
       _CPU.isExecuting = true;
+    }
+
 }
 
 
@@ -249,8 +263,24 @@ function krnLoadProgram()
     {
       currentBase = currentLimit;
 
+      // TODO 
+      //check the base, if base = 00 then partition 1
+      // if base = 256, then partition 2
+      // if base = 512 then partition 3
+
+      // if(currentBase === 0)
+      //   currentOffset = PARTITION_ONE;
+      // else if(currentBase === 256)
+      //   currentOffset = PARTITION_TWO;
+      // else if(currentBase === 512)
+      //   currentOffset = PARTITION_THREE;
+      // else
+      //   alert("error");
+
+      // alert("currentOffset " + currentOffset);
+
       // Calculate remaining free space.
-      currentOffset = (PAGE_SIZE - instructions.length);
+      //currentOffset = (PAGE_SIZE - instructions.length);
 
       //var base = memory.length;
       currentLimit = currentBase + PAGE_SIZE;
@@ -270,7 +300,7 @@ function krnLoadProgram()
       //alert("pc " + process.PC);
       if(process != null)
       {
-      // Update main memory.
+      // Update main memory and display
       updateMainMemory(instructions, process);
 
       // Notify the user that the program has loaded successfully.
@@ -279,7 +309,8 @@ function krnLoadProgram()
       }
       else
       {
-
+        _StdIn.advanceLine();
+        _StdIn.putText("Failed to load, memory full.");
       }
 
     }
@@ -289,16 +320,20 @@ function krnLoadProgram()
         _StdIn.putText("Failed to load, error in program.");
     }
     
+    //alert(residentPrograms.length);
 }
 
 // Function to run user program.
 function krnRunProgram(pid)
 {
   // Check if any programs to run.
-  if(memory.length > 0)
+  //if(memory.length > 0)
+  if(residentPrograms.length > 0)
   {
     // Get pcb for given pid.
     var newPCB = residentQueue[pid];
+    //alert(newPCB.pid);
+    //residentPrograms.shift();
 
     // Add pcb to ready queue.
     readyQueue.enqueue(newPCB);
@@ -309,15 +344,19 @@ function krnRunProgram(pid)
     killFlag = false;
 
     // Reset time slice.
-    timeSlice = 0;
+    //timeSlice = 0;
 
     // Start cpu.
-    _CPU.isExecuting = true;
+    // if(residentPrograms.length === 0)
+      _CPU.isExecuting = true;
 
    //TODO: execute program , update pcb, cpu, and display output.
   }
   else
     _StdIn.putText("Failed to run, no program loaded.");
+
+      // if(residentPrograms.length === 0)
+      // _CPU.isExecuting = true;
 
 }
 
@@ -335,8 +374,9 @@ function createProcess(base, limit)
 
   // Add pcb to associative array. (Resident in memory)
   residentQueue[_PCB.pid] = _PCB;
+  residentPrograms.push(_PCB);
 
-  // Update Ready Queue.
+  // Update Ready Queue display.
   updateReadyQueue(_PCB);
 
   krnTrace("New process created: " + _PCB.pid);
@@ -362,8 +402,9 @@ function krnPrint()
   //#$01 in X reg = print the integer stored in the Y register.
   if(parseInt(_CPU.Xreg, 10) == 1)
   {
-    _StdIn.putText(_CPU.Yreg.toString() + " ");
-   // _StdIn.advanceLine();
+    _StdIn.putText(_CPU.Yreg.toString());
+    _StdIn.advanceLine();
+    _OsShell.putPrompt();
   }
   //#$02 in X reg = print the 00-terminated string stored at the address in the Y register.
   else if (parseInt(_CPU.Xreg, 10) == 2)
@@ -371,9 +412,17 @@ function krnPrint()
     // While mem[] doesn't equal "00"
     while(parseInt(memory[parseInt(_CPU.Yreg, 16)], 10) !== 0)
     {
-      var output = String.fromCharCode(parseInt(memory[parseInt(_CPU.Yreg, 16)],16 ));
+      var output = String.fromCharCode(parseInt(memory[parseInt(_CPU.Yreg, 16) + (currentPCB.pid * PAGE_SIZE)],16 ));
+      //alert("output: " + output);
       _StdIn.putText(output.toString());
-      _CPU.Yreg++;
+      //_CPU.Yreg++;
+      // Add one to y reg.
+      var tempY = parseInt(_CPU.Yreg, 16) + 1;
+      //var tempY = (parseInt(_CPU.Yreg, 16)+ (currentPCB.pid * PAGE_SIZE)) + 1;
+      // Return back to hex.
+      tempY = tempY.toString(16);
+      // store in y.
+      _CPU.Yreg = tempY;
     }
 
     _StdIn.advanceLine();

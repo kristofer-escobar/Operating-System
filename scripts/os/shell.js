@@ -477,8 +477,16 @@ function shellRun(pid)
 {
     if(pid.length > 0)
     {
-        // Call kenel to run program.
-        krnRunProgram(pid);
+        if(residentQueue[pid] !== undefined)
+        {
+            // Call kenel to run program.
+            krnRunProgram(pid);
+        }
+        else
+        {
+            _StdIn.putText("Error: No process loaded with pid:" + pid );
+        }
+
     }
     else
     {
@@ -496,12 +504,12 @@ function shellRunAll(pid)
     }
     else
     {
-        if(readyQueue.getSize() > 0)
+        if(residentPrograms.length > 0)
         {
             // Call kenel to run all programs.
-            for(i = 0; i < readyQueue.getSize(); i++)
+            for(i = 0; i < residentPrograms.length; i++)
             {
-                krnRunProgram(readyQueue[i].pid);
+                krnRunProgram(residentPrograms[i].pid);
             }
         }
         else
@@ -540,7 +548,11 @@ function shellDisplay()
         {
             // Display pid.
             _StdIn.putText(readyQueue.q[i].pid + " ");
+
         }
+
+        if(_CPU.isExecuting)
+            _StdIn.putText(" " + currentPCB.pid);
     }
 
 }

@@ -70,6 +70,7 @@ function simBtnStartOS_click(btn)
     // .. enable the Emergency Halt and Reset buttons ...
     document.getElementById("btnHaltOS").disabled = false;
     document.getElementById("btnReset").disabled = false;
+    document.getElementById("btnStep").disabled = false;
     
     // .. set focus on the OS console display ...
     document.getElementById("display").focus();
@@ -104,6 +105,15 @@ function simBtnReset_click(btn)
     // That boolean parameter is the 'forceget' flag. When it is true it causes the page to always
     // be reloaded from the server. If it is false or not specified, the browser may reload the
     // page from its cache, which is not what we want.
+}
+
+function simBtnStep_click(btn)
+{
+  //alert("hello");
+  if(_CPU.isExecuting == true)
+    _CPU.isExecuting = false;
+  else
+    _CPU.isExecuting = true;
 }
 
 function blueScreenOfDeath(error)

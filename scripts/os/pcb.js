@@ -26,6 +26,7 @@ function pcb()
         this.base  = 0;
         this.limit = 0;
         this.PC    = this.pid * PAGE_SIZE;
+        // this.PC    = 0;
         this.Acc   = 0;
         this.Xreg  = 0;
         this.Yreg  = 0;

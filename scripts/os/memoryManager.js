@@ -36,7 +36,8 @@ function createMainMemoryTable()
         // Set the memory locations.
         var firstCellText = document.createTextNode(memoryLocation);
         firstCell.appendChild(firstCellText);
-
+        // Make bold.
+        firstCell.style.fontWeight = 'bold';
         // Add memory location column to row.
         row.appendChild(firstCell);
 
@@ -62,7 +63,7 @@ function createMainMemoryTable()
         }
 
         // Update memory location counter.
-        memoryLocation = (parseInt(memoryLocation, 10) + 8).toString(16).toUpperCase();
+        memoryLocation = (parseInt(memoryLocation, 16) + 8).toString(16).toUpperCase();
 
         // Style for memory location column.
         firstCell.style.border = "1px solid black";
@@ -102,7 +103,6 @@ function updateMainMemory(instructions, process)
     // Index for instruction position.
     var index = 0;
 
-    //TODO: Fix first column, make bold.
     // Updates cells.
     for(i = 1; i <= 8; i++)
         {
@@ -133,7 +133,18 @@ function updateMemory()
             for(j = 1; j <= 8; j++)
             {
                 if(index < currentPCB.limit)
-                   mainMemoryTable.rows[i].cells[j].innerHTML = memory[index];
+                {
+                    if(memory[index] === undefined)
+                    {
+                        mainMemoryTable.rows[i].cells[j].innerHTML = "00";
+                    }
+                    else
+                    {
+                        mainMemoryTable.rows[i].cells[j].innerHTML = memory[index];
+                    }
+                    
+                }
+                   //mainMemoryTable.rows[i].cells[j].innerHTML = memory[index];
 
                 index++;
                 
@@ -149,5 +160,5 @@ function validateMemory(memory, pcb)
     if(memory < pcb.limit)
         return memory
     else
-        blueScreenOfDeath("Page Fault.");
+        blueScreenOfDeath("Page Fault: Memory access violation.");
 }

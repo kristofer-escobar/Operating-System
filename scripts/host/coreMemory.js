@@ -11,6 +11,8 @@ var readyQueue = new Queue();
 // Associative array used to store pcb's (Resident queue).
 var residentQueue = {};
 
+var residentPrograms = [];
+
 // Associative array used to store terminated pcb's (Terminated queue).
 var terminatedQueue = {};
 
@@ -32,4 +34,10 @@ var SECTOR_SIZE = 8;
 
 // Constant for block size.
 var BLOCK_SIZE = 8;
+
+var PARTITION_ONE = 0;
+
+var PARTITION_TWO = 1;
+
+var PARTITION_THREE = 2;
 
