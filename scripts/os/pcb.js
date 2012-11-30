@@ -70,7 +70,8 @@ function updateReadyQueue(currPCB)
 
     pid.innerHTML = currPCB.pid;
     base.innerHTML = currPCB.base;
-    limit.innerHTML = currPCB.limit;
+    // Display limit minus 1. (e.g. 0 - 255)
+    limit.innerHTML = currPCB.limit - 1;
     pc.innerHTML = currPCB.PC;
     acc.innerHTML = currPCB.Acc;
     x.innerHTML = currPCB.Xreg;

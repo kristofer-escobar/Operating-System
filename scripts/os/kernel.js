@@ -5,13 +5,13 @@
    
    Routines for the Operataing System, NOT the host.
    
-   This code references page numbers in the text book: 
-   Operating System Concepts 8th editiion by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5   
+   This code references page numbers in the text book:
+   Operating System Concepts 8th editiion by Silberschatz, Galvin, and Gagne.  ISBN 978-0-470-12872-5
    ------------ */
 
 
 //
-// OS Startup and Shutdown Routines   
+// OS Startup and Shutdown Routines
 //
 function krnBootstrap()      // Page 8.
 {
@@ -36,7 +36,16 @@ function krnBootstrap()      // Page 8.
     krnKeyboardDriver.driverEntry();                    // Call the driverEntry() initialization routine.
     krnTrace(krnKeyboardDriver.status);
 
-    // 
+   // Load the File System Device Driver
+    krnTrace("Loading the file system device driver.");
+    krnFileSystemDriver = new DeviceDriverFileSystem();     // Construct it.
+    krnFileSystemDriver.driverEntry();                    // Call the driverEntry() initialization routine.
+    krnTrace(krnFileSystemDriver.status);
+    krnFileSystemDriver.init();
+
+    //alert(hard_drive.getItem("0"));
+    //alert(hard_drive.getItem("001"));
+    //
     // ... more?
     //
 
@@ -44,7 +53,7 @@ function krnBootstrap()      // Page 8.
     krnTrace("Enabling the interrupts.");
     krnEnableInterrupts();
     // Launch the shell.
-    krnTrace("Creating and Launching the shell.")
+    krnTrace("Creating and Launching the shell.");
     _OsShell = new Shell();
 
     _OsShell.init();
@@ -53,11 +62,11 @@ function krnBootstrap()      // Page 8.
 function krnShutdown()
 {
     krnTrace("begin shutdown OS");
-    // TODO: Check for running processes.  Alert if there are some, alert and stop.  Else...    
+    // TODO: Check for running processes.  Alert if there are some, alert and stop.  Else...
     // ... Disable the Interruupts.
     krnTrace("Disabling the interrupts.");
     krnDisableInterrupts();
-    // 
+    //
     // Unload the Device Drivers?
     // More?
     //
@@ -65,11 +74,11 @@ function krnShutdown()
 }
 
 
-function krnOnCPUClockPulse() 
+function krnOnCPUClockPulse()
 {
-    /* This gets called from the host hardware every time there is a hardware clock pulse. 
+    /* This gets called from the host hardware every time there is a hardware clock pulse.
        This is NOT the same as a TIMER, which causes an interrupt and is handled like other interrupts.
-       This, on the other hand, is the clock pulse from the hardware (or host) that tells the kernel 
+       This, on the other hand, is the clock pulse from the hardware (or host) that tells the kernel
        that it has to look for interrupts and process them if it finds any.                           */
 
     // Check for an interrupt, are any. Page 560
@@ -92,9 +101,9 @@ function krnOnCPUClockPulse()
 }
 
 
-// 
+//
 // Interrupt Handling
-// 
+//
 function krnEnableInterrupts()
 {
     // Keyboard
@@ -263,7 +272,7 @@ function krnLoadProgram()
     {
       currentBase = currentLimit;
 
-      // TODO 
+      // TODO
       //check the base, if base = 00 then partition 1
       // if base = 256, then partition 2
       // if base = 512 then partition 3
@@ -298,7 +307,7 @@ function krnLoadProgram()
       var process = createProcess(currentBase, currentLimit);
 
       //alert("pc " + process.PC);
-      if(process != null)
+      if(process !== null)
       {
       // Update main memory and display
       updateMainMemory(instructions, process);

@@ -131,6 +131,62 @@ function shellInit()
     sc.function = shellDisplay;
     this.commandList[this.commandList.length] = sc;
 
+    // Create a file.
+    sc = new ShellCommand();
+    sc.command = "create";
+    sc.description = "- Create a file.";
+    sc.function = shellCreate;
+    this.commandList[this.commandList.length] = sc;
+
+    // Read a file.
+    sc = new ShellCommand();
+    sc.command = "read";
+    sc.description = "- Read a file.";
+    sc.function = shellRead;
+    this.commandList[this.commandList.length] = sc;
+
+    // Write a file.
+    sc = new ShellCommand();
+    sc.command = "write";
+    sc.description = "- Write a file.";
+    sc.function = shellWrite;
+    this.commandList[this.commandList.length] = sc;
+
+    // Delete a file.
+    sc = new ShellCommand();
+    sc.command = "delete";
+    sc.description = "- Delete a file.";
+    sc.function = shellDelete;
+    this.commandList[this.commandList.length] = sc;
+
+    // Format.
+    sc = new ShellCommand();
+    sc.command = "format";
+    sc.description = "- Format.";
+    sc.function = shellFormat;
+    this.commandList[this.commandList.length] = sc;
+
+    // Schedule.
+    sc = new ShellCommand();
+    sc.command = "schedule";
+    sc.description = "- Schedule.";
+    sc.function = shellSchedule;
+    this.commandList[this.commandList.length] = sc;
+
+    // ls.
+    sc = new ShellCommand();
+    sc.command = "ls";
+    sc.description = "- List files.";
+    sc.function = shellLs;
+    this.commandList[this.commandList.length] = sc;
+
+    // get_schedule.
+    sc = new ShellCommand();
+    sc.command = "get_schedule";
+    sc.description = "- Get current scheduling algorithm.";
+    sc.function = shellGetSchedule;
+    this.commandList[this.commandList.length] = sc;
+
     // shutdown
     sc = new ShellCommand();
     sc.command = "shutdown";
@@ -560,11 +616,175 @@ function shellDisplay()
 function shellHelp(args)
 {
     _StdIn.putText("Commands:");
-    for (i in _OsShell.commandList)
+    for (var i in _OsShell.commandList)
     {
         _StdIn.advanceLine();
         _StdIn.putText("  " + _OsShell.commandList[i].command + " " + _OsShell.commandList[i].description);
     }
+}
+
+// Function to create a file.
+function shellCreate(fileName)
+{
+        // Check if filename is given.
+    if (fileName.length <= 0)
+    {
+        _StdIn.putText("File named required.");
+    }
+    else
+    {
+        if(findFile(fileName) == -1)
+        {
+            // Call file system device driver to create a file.
+            var successful = fileSystemCreateFile(fileName);
+
+            if(successful)
+            {
+                _StdIn.putText("File named '"  + fileName + "' was created successfully.");
+            }
+            else
+            {
+                _StdIn.putText("Error: File named '"  + fileName + "' was not created.");
+            }
+        }
+        else
+        {
+            _StdIn.putText("Error: File named '"  + fileName + "' already exist.");
+        }
+    }
+}
+
+// Function to read a file.
+function shellRead(fileName)
+{
+    // Check if filename is given.
+    if (fileName.length <= 0)
+    {
+        _StdIn.putText("File named required.");
+    }
+    else
+    {
+        // Call file system device driver to read a file.
+        fileSystemReadFile(fileName);
+        //_StdIn.putText("Reading file named '"  + fileName + "'.");
+    }
+
+}
+
+// Function to write to a file.
+function shellWrite(args)
+{
+    // Check if filename is given.
+    if (args.length <= 0)
+    {
+        _StdIn.putText("File named required.");
+    }
+    else if(args.length <= 1)
+    {
+        _StdIn.putText("Enter data to be written.");
+    }
+    else
+    {
+        // First parameter is the file name.
+        var fileName = args.shift();
+
+        // The remainder is the data.
+        var data = args.join(" ");
+
+        // Call file system device driver to write to a file.
+        var successful  =  fileSystemWriteFile(fileName, data);
+
+        if(successful)
+        {
+            _StdIn.putText("Write successful.");
+        }
+        else
+        {
+            _StdIn.putText("Write failed.");
+        }
+    }
+
+}
+
+// Function to delete a file.
+function shellDelete(fileName)
+{
+    // Check if filename is given.
+    if (fileName.length <= 0)
+    {
+        _StdIn.putText("File named required.");
+    }
+    else
+    {
+        // Call file system device driver to delete a file.
+        var successful = fileSystemDeleteFile(fileName);
+        
+        if(successful)
+        {
+            _StdIn.putText("File '" + fileName + "'' has been deleted.");
+        }
+        else
+        {
+            _StdIn.putText("Delete failed.");
+        }
+    }
+}
+
+// Function to format a file.
+function shellFormat(args)
+{
+    if (args.length > 0)
+    {
+        _StdIn.putText("Format doesn't take any parameters.");
+    }
+    else
+    {
+        //hard_drive.clear();
+        formatHardDrive();
+        _StdIn.putText("Formatting complete.");
+    }
+
+}
+
+// function to set scheduling algorthim.
+function shellSchedule(args)
+{
+    if (args.length > 0)
+    {
+        if(args.length > 1)
+        {
+            _StdIn.putText("Command schedule only takes one parameter.");
+        }
+        else
+        {
+            _StdIn.putText("CPU scheduling algorithm set to " + args + ". ");
+        }
+
+    }
+    else
+    {
+        _StdIn.putText("Scheduling algorithm required.");
+    }
+
+}
+
+// function to return the currently selected cpu scheduling algorithm.
+function shellGetSchedule(args)
+{
+    if(args.length > 0)
+    {
+        _StdIn.putText("Command get_schedule takes no parameters.");
+    }
+    else
+    {
+        _StdIn.putText("Return scheduling algorithm.");
+    }
+}
+
+// function to list files.
+function shellLs(args)
+{
+    _StdIn.putText("List of files.");
 }
 
 function shellShutdown(args)

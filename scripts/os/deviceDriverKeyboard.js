@@ -38,7 +38,6 @@ function krnKbdDispatchKeyPress(params)
         blueScreenOfDeath("keyCode: " + keyCode);
     }
 
-
     // Check for backspace.
     if(keyCode == 8) // Backspace
     {

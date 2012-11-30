@@ -88,4 +88,14 @@ var killFlag = false;
 
 var processToKill = null;
 
+// Max hdd size in decimal.
+var MAX_HDD_SIZE = 256;
 
+// End of track one in decimal.
+var END_OF_DIRECTORY = 63;
+
+var FREE_BLOCK = "00";
+
+var OCCUPIED_BLOCK = "01";
+
+var HORIZONTAL_LINE = "==============";

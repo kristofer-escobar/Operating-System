@@ -16,6 +16,9 @@ var residentPrograms = [];
 // Associative array used to store terminated pcb's (Terminated queue).
 var terminatedQueue = {};
 
+// Array used to simulate secondary storage. (hard drive)
+var hard_drive = window.localStorage;
+
 /*
  * MEMORY CONSTANTS.
  */
